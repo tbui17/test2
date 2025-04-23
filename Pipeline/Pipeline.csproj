@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <NoWarn>CS0649;CS0169;CA1050;CA1822;CA2211;IDE1006</NoWarn>
+    <NukeRootDirectory>..</NukeRootDirectory>
+    <NukeScriptDirectory>..</NukeScriptDirectory>
+    <NukeTelemetryVersion>1</NukeTelemetryVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nuke.Common"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\libraries\lokql-engine\lokql-engine.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="..\build.cmd" />
+    <None Remove="..\build.ps1" />
+    <None Remove="..\build.sh" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="boot\" />
+  </ItemGroup>
+
+</Project>

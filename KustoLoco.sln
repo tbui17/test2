@@ -32,6 +32,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{44F51B35-D6EE-402F-93C7-3C43B1FD62B2}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		.github\workflows\build-main.yml = .github\workflows\build-main.yml
+		.github\workflows\build-pr.yml = .github\workflows\build-pr.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rendering", "libraries\Rendering\Rendering.csproj", "{3516DC9F-BB29-42B1-AEA0-A2EB7B8CD073}"
@@ -102,12 +104,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderTests", "test\RenderT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SixelSupport", "libraries\SixelSupport\SixelSupport.csproj", "{5FD03395-D208-4CD8-A7B6-2CFDB50FB0A4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pipeline", "Pipeline\Pipeline.csproj", "{043603DB-8579-45E7-A80C-9399112B0256}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{043603DB-8579-45E7-A80C-9399112B0256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{043603DB-8579-45E7-A80C-9399112B0256}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AF6D7B2-15C5-417B-9B72-ECC725B6FFD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1AF6D7B2-15C5-417B-9B72-ECC725B6FFD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AF6D7B2-15C5-417B-9B72-ECC725B6FFD7}.Release|Any CPU.ActiveCfg = Release|Any CPU

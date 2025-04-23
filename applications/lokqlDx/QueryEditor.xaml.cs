@@ -369,7 +369,7 @@ public partial class QueryEditor : UserControl
         if (e.Text == "?") ShowCompletions(_kqlFunctionEntries, string.Empty, 1);
     }
 
-    public void AddInternalCommands(IEnumerable<VerbEntry> verbEntries)
+    public void AddInternalCommands(IEnumerable<IVerbEntry> verbEntries)
     {
         var verbs = verbEntries.ToArray();
         _internalCommands = verbs.Select(v =>
