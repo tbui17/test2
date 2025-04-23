@@ -32,3 +32,5 @@ jobs:
         run: ./build_nuke.ps1
         env:
           NUKE_WIKI_REPOSITORY_URL: https://github.com/tbui17/test1.wiki.git
+          NUKE_GIT_USERNAME: github-actions[bot]
+          NUKE_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com

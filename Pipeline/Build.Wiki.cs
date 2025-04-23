@@ -27,6 +27,9 @@ public partial class Build
 
     [Solution] Solution Solution;
 
+    [Parameter] string GitUsername;
+    [Parameter] string GitEmail;
+
 
 
     [GitRepository] GitRepository GitRepository;
@@ -77,8 +80,8 @@ public partial class Build
         {
             WikiGitContext = GitContextFactory.Create(WikiRepositoryFolder);
             var ctx = WikiGitContext;
-            ctx.Git("config --local user.name github-actions[bot]");
-            ctx.Git("config --local user.email github-actions[bot]@users.noreply.github.com");
+            ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
+            ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
             ctx.Git("config --local core.autocrlf false");
 
         });
