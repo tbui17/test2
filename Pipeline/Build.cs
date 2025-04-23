@@ -1,11 +1,9 @@
 using Nuke.Common;
-using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 
 namespace Pipeline;
 
-[GitHubActions(name: "a", GitHubActionsImage.UbuntuLatest, OnPullRequestBranches = ["main"])]
 public partial class Build : NukeBuild
 {
     /// Support plugins are available for:
