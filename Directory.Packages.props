@@ -20,8 +20,6 @@
     <PackageVersion Include="MemoryExtensions" Version="1.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.3" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.4" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="9.1.0-preview.1.25064.3" />
