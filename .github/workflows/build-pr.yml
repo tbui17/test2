@@ -27,6 +27,6 @@ jobs:
           dotnet-version: 9.0.x
       - name: Nuke CI
         shell: pwsh
-        run: ./build.ps1
+        run: ./build_nuke.ps1
         env:
           NUKE_WIKI_REPOSITORY_URL: https://github.com/tbui17/test1.wiki.git
