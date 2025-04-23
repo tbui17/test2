@@ -2,9 +2,10 @@ using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
+
 namespace Pipeline;
 
-[GitHubActions(name:"a",GitHubActionsImage.UbuntuLatest)]
+[GitHubActions(name: "a", GitHubActionsImage.UbuntuLatest, OnPullRequestBranches = ["main"])]
 public partial class Build : NukeBuild
 {
     /// Support plugins are available for:
@@ -17,8 +18,7 @@ public partial class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     Configuration Configuration => IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [PathVariable]
-    Tool Git;
+    [PathVariable] Tool Git;
 
     public static int Main() => Execute<Build>(x => x.Default);
 
@@ -45,6 +45,5 @@ public partial class Build : NukeBuild
 
 
     Target Default => _ => _
-        .DependsOn(Test, WriteWiki,ProvideMainRepository);
+        .DependsOn(Test, WriteWiki, ProvideMainRepository);
 }
-

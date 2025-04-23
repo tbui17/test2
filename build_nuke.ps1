@@ -1,79 +1,75 @@
-
-
 [CmdletBinding()]
-param(
-
-    [Parameter(Mandatory = $true, HelpMessage = "version for package")]
-    [string] $version,
-    [Parameter(HelpMessage = "api key (if publising nuget packages)")]
-    [string] $api,
-
-    [Parameter(HelpMessage = "test only")]
-    [switch] $skipBuild,
-    [Parameter(HelpMessage = "do not create upload zip")]
-    [switch] $skipZip
-
+Param(
+    [Parameter(Position=0,Mandatory=$false,ValueFromRemainingArguments=$true)]
+    [string[]]$BuildArguments
 )
 
-if (-not $skipBuild) {
-    #force rebuild
-    Get-ChildItem -r bin | Remove-Item -r
-    Get-ChildItem -r obj | Remove-Item -r
+Write-Output "PowerShell $($PSVersionTable.PSEdition) version $($PSVersionTable.PSVersion)"
 
-    dotnet build -c Release
-    Get-ChildItem -r *.nupkg | Remove-Item -r
+Set-StrictMode -Version 2.0; $ErrorActionPreference = "Stop"; $ConfirmPreference = "None"; trap { Write-Error $_ -ErrorAction Continue; exit 1 }
+$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
-    #make nuget packages
-    dotnet pack   -p:PackageVersion=$version .\libraries\KustoLoco.Core\KustoLoco.Core.csproj
-    dotnet pack   -p:PackageVersion=$version .\libraries\FileFormats\FileFormats.csproj
-    dotnet pack   -p:PackageVersion=$version .\libraries\Rendering\Rendering.csproj
-    dotnet pack   -p:PackageVersion=$version .\libraries\ScottPlotRendering\ScottPlotRendering.csproj
-    dotnet pack   -p:PackageVersion=$version .\libraries\SixelSupport\SixelSupport.csproj
+###########################################################################
+# CONFIGURATION
+###########################################################################
 
-    dotnet pack   -p:PackageVersion=$version .\sourceGeneration\SourceGenDependencies\SourceGenDependencies.csproj
+$BuildProjectFile = "$PSScriptRoot\Pipeline\Pipeline.csproj"
+$TempDirectory = "$PSScriptRoot\\.nuke\temp"
 
-    #build application exes
+$DotNetGlobalFile = "$PSScriptRoot\\global.json"
+$DotNetInstallUrl = "https://dot.net/v1/dotnet-install.ps1"
+$DotNetChannel = "STS"
 
-    dotnet publish  /p:Version="$version" /p:InformationalVersion="$version"  .\applications\lokql\lokql.csproj -r win-x64 -p:PublishSingleFile=true --self-contained false --output .\publish\lokql -c:Release -p:PackageVersion=$version
-    dotnet publish  /p:Version="$version" /p:InformationalVersion="$version"  .\applications\lokql\lokql.csproj -r linux-x64 -p:PublishSingleFile=true --self-contained false --output .\publish\lokql-linux -c:Release -p:PackageVersion=$version
+$env:DOTNET_CLI_TELEMETRY_OPTOUT = 1
+$env:DOTNET_NOLOGO = 1
+$env:NUKE_TELEMETRY_OPTOUT = 1
 
-    dotnet publish  /p:Version="$version" /p:InformationalVersion="$version" .\applications\lokqldx\lokqldx.csproj -r win-x64 -p:PublishSingleFile=true --self-contained false --output .\publish\lokqldx  -p:PackageVersion=$version
-    dotnet publish  /p:Version="$version" /p:InformationalVersion="$version" .\applications\pskql\pskql.csproj -r win-x64 --self-contained false --output .\publish\pskql  -p:PackageVersion=$version
-    dotnet publish  /p:Version="$version" /p:InformationalVersion="$version" .\applications\pskql\pskql.csproj -r linux-x64 --self-contained false --output .\publish\pskql-linux  -p:PackageVersion=$version
+###########################################################################
+# EXECUTION
+###########################################################################
 
-    #remove pdbs
-    get-ChildItem -recurse -path .\publish\ -include *.pdb | remove-item
-
-    #clean up pskql....
-    get-ChildItem -recurse -path .\publish\pskql -include Microsoft.*.dll | remove-item
-    get-ChildItem -recurse -path .\publish\pskql -include System.*.dll | remove-item
-    #clean up pskql linux....
-    get-ChildItem -recurse -path .\publish\pskql-linux -include Microsoft.*.dll | remove-item
-    get-ChildItem -recurse -path .\publish\pskql-linux -include System.*.dll | remove-item
-
-    #copy tutorials to publish folder
-    New-Item -ItemType Directory -Path .\publish\tutorials -Force
-    copy-item .\docs\tutorials\* .\publish\tutorials
+function ExecSafe([scriptblock] $cmd) {
+    & $cmd
+    if ($LASTEXITCODE) { exit $LASTEXITCODE }
 }
 
-if (-not ($api -like '') ) {
-    dotnet nuget push libraries\KustoLoco.Core\bin\Release\KustoLoco.Core.$($version).nupkg --api-key $api --source https://api.nuget.org/v3/index.json
-    dotnet nuget push libraries\FileFormats\bin\Release\KustoLoco.FileFormats.$($version).nupkg --api-key $api --source https://api.nuget.org/v3/index.json
-    dotnet nuget push libraries\Rendering\bin\Release\KustoLoco.Rendering.$($version).nupkg --api-key $api --source https://api.nuget.org/v3/index.json
-    dotnet nuget push libraries\ScottPlotRendering\bin\Release\KustoLoco.Rendering.ScottPlot.$($version).nupkg --api-key $api --source https://api.nuget.org/v3/index.json
-    dotnet nuget push libraries\SixelSupport\bin\Release\KustoLoco.Rendering.SixelSupport.$($version).nupkg --api-key $api --source https://api.nuget.org/v3/index.json
-    dotnet nuget push sourceGeneration\SourceGenDependencies\bin\Release\KustoLoco.SourceGeneration.Attributes.$($version).nupkg --api-key $api --source https://api.nuget.org/v3/index.json
+# If dotnet CLI is installed globally and it matches requested version, use for execution
+if ($null -ne (Get-Command "dotnet" -ErrorAction SilentlyContinue) -and `
+     $(dotnet --version) -and $LASTEXITCODE -eq 0) {
+    $env:DOTNET_EXE = (Get-Command "dotnet").Path
 }
+else {
+    # Download install script
+    $DotNetInstallFile = "$TempDirectory\dotnet-install.ps1"
+    New-Item -ItemType Directory -Path $TempDirectory -Force | Out-Null
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    (New-Object System.Net.WebClient).DownloadFile($DotNetInstallUrl, $DotNetInstallFile)
 
-get-ChildItem -r *.nupkg | % FullName
-
-if (-not $skipZip)
-{
-    $v=$version.replace('.','-')
-    $compress = @{
-        Path = ".\publish"
-        CompressionLevel = "Fastest"
-        DestinationPath = "uploads\kustoloco-$v.zip"
+    # If global.json exists, load expected version
+    if (Test-Path $DotNetGlobalFile) {
+        $DotNetGlobal = $(Get-Content $DotNetGlobalFile | Out-String | ConvertFrom-Json)
+        if ($DotNetGlobal.PSObject.Properties["sdk"] -and $DotNetGlobal.sdk.PSObject.Properties["version"]) {
+            $DotNetVersion = $DotNetGlobal.sdk.version
+        }
     }
-    Compress-Archive @compress
+
+    # Install by channel or version
+    $DotNetDirectory = "$TempDirectory\dotnet-win"
+    if (!(Test-Path variable:DotNetVersion)) {
+        ExecSafe { & powershell $DotNetInstallFile -InstallDir $DotNetDirectory -Channel $DotNetChannel -NoPath }
+    } else {
+        ExecSafe { & powershell $DotNetInstallFile -InstallDir $DotNetDirectory -Version $DotNetVersion -NoPath }
+    }
+    $env:DOTNET_EXE = "$DotNetDirectory\dotnet.exe"
+    $env:PATH = "$DotNetDirectory;$env:PATH"
 }
+
+Write-Output "Microsoft (R) .NET SDK version $(& $env:DOTNET_EXE --version)"
+
+if (Test-Path env:NUKE_ENTERPRISE_TOKEN) {
+    & $env:DOTNET_EXE nuget remove source "nuke-enterprise" > $null
+    & $env:DOTNET_EXE nuget add source "https://f.feedz.io/nuke/enterprise/nuget" --name "nuke-enterprise" --username "PAT" --password $env:NUKE_ENTERPRISE_TOKEN > $null
+}
+
+ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet }
+ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -- $BuildArguments }
