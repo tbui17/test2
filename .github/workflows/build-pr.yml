@@ -23,20 +23,21 @@ jobs:
         with:
           token: '${{ secrets.GH_PAT }}'
           path: repo
-      - name: List files
+      - name: Script
         shell: pwsh
         run: |
-          cd repo
-          ls
-      - name: Modify Wiki Content
-        run: |
+          ".help" > cmd.txt
+          $fileName = "LokqlDx-‐-commands.md"
+          dotnet run --project ./applications/lokql -- run --run "cmd.txt" | select -skip 3 | set-content $fileName
+          move-item $fileName ./wiki/$fileName -force
+          
           cd wiki
-          echo "### New Content" >> Home.md
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Automated wiki update via GitHub Actions"
-          git push --force
+          $hasChanges
+          git commit -m "chore: auto update command help ${{ github.run_id }}"
+          git push
 #      - name: 'Cache: .nuke/temp, ~/.nuget/packages'
 #        uses: actions/cache@v4
 #        with:
