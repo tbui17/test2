@@ -67,7 +67,7 @@ public partial class Build
                     ? MainRepository.GetWikiRepository()
                     : GitRepository.FromUrl(WikiRepositoryUrl);
 
-                Log.Information("Initialized wiki repository object. {IsFromParameter} {@RepositoryDetails}",!isEmpty,MainRepository.GetDetails());
+                Log.Information("Initialized wiki repository object. {IsFromParameter} {@RepositoryDetails}",!isEmpty,WikiRepository.GetDetails());
             }
         );
 
@@ -85,9 +85,9 @@ public partial class Build
         .Executes(() =>
         {
             var ctx = GitContextFactory.Create(WikiRepositoryFolder);
-            ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
-            ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
-            ctx.Git("config --local core.autocrlf false");
+            // ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
+            // ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
+            // ctx.Git("config --local core.autocrlf false");
             WikiGitContext = ctx;
         });
 

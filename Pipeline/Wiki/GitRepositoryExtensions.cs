@@ -25,6 +25,7 @@ public static class GitRepositoryExtensions
     {
         var info = new
         {
+
             repository.Branch,
             repository.Commit,
             repository.Endpoint,
@@ -35,6 +36,20 @@ public static class GitRepositoryExtensions
             repository.Tags,
             repository.LocalDirectory,
             repository.Protocol,
+
+
+            GitHubName = repository.GetGitHubName(),
+            GitHubOwner = repository.GetGitHubOwner(),
+            DefaultBranch = repository.GetDefaultBranch().Result,
+
+
+            IsOnDevelopBranch = repository.IsOnDevelopBranch(),
+            IsOnFeatureBranch = repository.IsOnFeatureBranch(),
+            IsOnHotfixBranch = repository.IsOnHotfixBranch(),
+            IsOnMainBranch = repository.IsOnMainBranch(),
+            IsOnMainOrMasterBranch = repository.IsOnMainOrMasterBranch(),
+            IsOnMasterBranch = repository.IsOnMasterBranch(),
+            IsOnReleaseBranch = repository.IsOnReleaseBranch()
         };
         return info;
     }
