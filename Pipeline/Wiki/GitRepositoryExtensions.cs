@@ -18,7 +18,7 @@ public static class GitRepositoryExtensions
 
     public static string GetAuthenticatedUrl(this GitRepository repository, string username, string token)
     {
-        return $"https://{username}:{token}@{repository.GetGitHubOwner()}/{repository.GetGitHubName()}";
+        return $"https://{username}:{token}@github.com/{repository.GetGitHubOwner()}/{repository.GetGitHubName()}.git";
     }
 
     public static object GetDetails(this GitRepository repository)
