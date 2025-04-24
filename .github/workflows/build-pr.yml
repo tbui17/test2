@@ -13,10 +13,6 @@ jobs:
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_PAT }}
-          path: repo
       - name: Checkout Wiki
         uses: actions/checkout@v4
         with:
