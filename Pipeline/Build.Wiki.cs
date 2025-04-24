@@ -88,7 +88,7 @@ public partial class Build
             ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
             ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
             ctx.Git("config --local core.autocrlf false");
-            var url = WikiRepository.GetAuthenticatedUrl(GitUsername,GitHubActions.Token.NotNull());
+            var url = WikiRepository.GetAuthenticatedUrl(GitUsername,GitHubActions.NotNull().Token.NotNullOrWhiteSpace());
             ctx.Git($"remote add {WikiRepositoryFolder.Name} {url}");
             WikiGitContext = ctx;
         });
