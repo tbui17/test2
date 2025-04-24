@@ -33,4 +33,4 @@ jobs:
         env:
           NUKE_WIKI_REPOSITORY_URL: https://github.com/tbui17/test1.wiki.git
           NUKE_GIT_USERNAME: github-actions[bot]
-          NUKE_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          NUKE_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
