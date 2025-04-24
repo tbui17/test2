@@ -176,7 +176,7 @@ public partial class Build
         .Executes(() =>
             {
                 var ctx = WikiGitContext;
-                ctx.Git($"push ${WikiRepositoryFolder.Name} HEAD:master");
+                ctx.Git($"push {WikiRepositoryFolder.Name} HEAD:master");
                 Log.Information("Successfully pushed wiki changes.");
             }
         );
