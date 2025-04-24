@@ -21,6 +21,8 @@ public partial class Build
     AbsolutePath WikiFolder => TemporaryDirectory / "WikiBin";
     AbsolutePath CommandHelpFile => WikiFolder / "LokqlDx-‐-commands.md";
     AbsolutePath WikiRepositoryFolder => AbsolutePath.Create(Path.GetTempPath()) / "WikiRepo"; // we need to use the system temp path because TemporaryDirectory (.nuke/temp) is inside a repository
+    const string BotName = "github-actions[bot]";
+    const string BotEmail = "41898282+github-actions[bot]@users.noreply.github.com";
 
 
     [Parameter] string WikiRepositoryUrl;
@@ -29,9 +31,6 @@ public partial class Build
     [Parameter] public bool DryRun;
 
     [Solution] Solution Solution;
-
-    [Parameter] string GitUsername;
-    [Parameter] string GitEmail;
 
     GitHubActions GitHubActions => GitHubActions.Instance;
 
@@ -79,13 +78,12 @@ public partial class Build
     GitContext WikiGitContext { get; set; }
     Target InitializeWikiGitContext => _ => _
         .DependsOn(ProvideGitContextFactory,CloneWikiRepository)
-        .Requires(() => GitUsername, () => GitEmail)
         .Unlisted()
         .Executes(() =>
         {
             var ctx = GitContextFactory.Create(WikiRepositoryFolder);
-            ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
-            ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
+            ctx.Git($"config --local user.name \"{BotName:nq}\"");
+            ctx.Git($"config --local user.email \"{BotEmail:nq}\"");
             ctx.Git("config --local core.autocrlf false");
             WikiGitContext = ctx;
         });
@@ -175,7 +173,7 @@ public partial class Build
         .Executes(() =>
             {
                 var ctx = WikiGitContext;
-                ctx.Git($"push origin");
+                ctx.Git($"push");
                 Log.Information("Successfully pushed wiki changes.");
             }
         );

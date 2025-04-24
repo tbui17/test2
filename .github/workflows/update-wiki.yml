@@ -6,59 +6,25 @@ on:
       - main
 
 jobs:
-  update-wiki:
-    runs-on: ubuntu-latest
+  test:
+    strategy:
+      matrix:
+        #        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout Main Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: 'Cache: .nuke/temp, ~/.nuget/packages'
+        uses: actions/cache@v4
         with:
-          path: repo
-      - name: Checkout Wiki
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}.wiki
-          path: wiki
+          path: |
+            .nuke/temp
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-      - name: Update Wiki
+      - name: Nuke CI
         shell: pwsh
-        run: |
-          # generate docs
-          
-          pushd repo
-          
-          $fileName = "LokqlDx-‐-commands.md"
-          $location = "../wiki/$fileName"
-        
-          
-          Write-Host "Generating docs"
-          clear-content $location
-          "``````" >> $location
-          dotnet run --project ./applications/lokql -- -c ".help" | select -skip 3 | set-content $location
-          "``````" >> $location
-          
-          # merge and push changes
-          
-          popd
-          cd wiki
-          
-          # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          Write-Host "Adding changes"
-          git add --all
-          $hasChanges = (git diff --staged --shortstat | measure-object).Count -gt 0
-          if (!$hasChanges){
-            Write-Host "No changes detected. No changes made to wiki."
-            return;
-          }
-          
-          Write-Host "Committing changes"
-          git commit -m "chore: auto update command help ${{ github.run_id }}"
-          Write-Host "Pushing changes"
-          # could error when two successive changes are in job queue / concurrently running at once, the older one will throw
-          git push
-          Write-Host "Successfully updated wiki with changes."
+        run: ./build_nuke.ps1
