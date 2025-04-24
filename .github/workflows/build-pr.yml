@@ -13,29 +13,36 @@ jobs:
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
       - name: Checkout Wiki
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}.wiki
           token: '${{ secrets.GH_PAT }}'
           path: wiki
-      - uses: actions/checkout@v4
-        with:
-          token: '${{ secrets.GH_PAT }}'
-          path: repo
-      - name: Script
+      - name: Update Wiki
         shell: pwsh
         run: |
           ".help" > cmd.txt
           $fileName = "LokqlDx-‐-commands.md"
-          dotnet run --project ./applications/lokql -- run --run "cmd.txt" | select -skip 3 | set-content $fileName
-          move-item $fileName ./wiki/$fileName -force
+          $location = "wiki/$fileName"
+          dotnet run --project ./applications/lokql -- run --run "cmd.txt" | select -skip 3 | set-content $location
           
           cd wiki
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
-          $hasChanges
+          $hasChanges = (git diff --staged --shortstat | measure-object).Count -gt 0
+          if (!$hasChanges){
+            Write-Information "No changes detected."
+            return;
+          }
           git commit -m "chore: auto update command help ${{ github.run_id }}"
           git push
 #      - name: 'Cache: .nuke/temp, ~/.nuget/packages'
