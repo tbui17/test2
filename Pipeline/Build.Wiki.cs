@@ -88,8 +88,6 @@ public partial class Build
             ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
             ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
             ctx.Git("config --local core.autocrlf false");
-            var url = WikiRepository.GetAuthenticatedUrl(GitUsername,GitHubActions.NotNull().Token.NotNullOrWhiteSpace());
-            ctx.Git($"remote add {WikiRepositoryFolder.Name} {url}");
             WikiGitContext = ctx;
         });
 
@@ -176,7 +174,7 @@ public partial class Build
         .Executes(() =>
             {
                 var ctx = WikiGitContext;
-                ctx.Git($"push {WikiRepositoryFolder.Name} HEAD:master");
+                ctx.Git($"push origin HEAD:master");
                 Log.Information("Successfully pushed wiki changes.");
             }
         );
