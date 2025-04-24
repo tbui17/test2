@@ -16,6 +16,11 @@ public static class GitRepositoryExtensions
         return GitRepository.FromUrl(repository.GetWikiUrl());
     }
 
+    public static string GetAuthenticatedUrl(this GitRepository repository, string username, string token)
+    {
+        return $"https://{username}:{token}@{repository.GetGitHubOwner()}/{repository.GetGitHubName()}";
+    }
+
     public static object GetDetails(this GitRepository repository)
     {
         var info = new
