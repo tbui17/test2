@@ -29,21 +29,27 @@ jobs:
       - name: Update Wiki
         shell: pwsh
         run: |
+          Write-Information "Generated cmd.txt"
           ".help" > cmd.txt
           $fileName = "LokqlDx-‐-commands.md"
+          
           $location = "wiki/$fileName"
+          Write-Information "Running app"
           dotnet run --project ./applications/lokql -- run --run "cmd.txt" | select -skip 3 | set-content $location
           
           cd wiki
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
+          Write-Information "Adding changes"
+          git add --all
           $hasChanges = (git diff --staged --shortstat | measure-object).Count -gt 0
           if (!$hasChanges){
             Write-Information "No changes detected."
             return;
           }
+          Write-Information "Committing changes"
           git commit -m "chore: auto update command help ${{ github.run_id }}"
+          Write-Information "Pushing changes"
           git push
 #      - name: 'Cache: .nuke/temp, ~/.nuget/packages'
 #        uses: actions/cache@v4
