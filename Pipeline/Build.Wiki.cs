@@ -174,7 +174,7 @@ public partial class Build
         .Executes(() =>
             {
                 var ctx = WikiGitContext;
-                ctx.Git($"push origin HEAD:master");
+                ctx.Git($"push origin");
                 Log.Information("Successfully pushed wiki changes.");
             }
         );
