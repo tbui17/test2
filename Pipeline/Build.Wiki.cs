@@ -1,5 +1,4 @@
 ﻿using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.Tools.GitHub;
 
 namespace Pipeline;
 using System.IO;
