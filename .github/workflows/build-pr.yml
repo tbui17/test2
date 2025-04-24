@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}.wiki
-          token: '${{ secrets.GH_PAT }}'
+          token: '${{ github.token }}'
       - name: Modify Wiki Content
         run: |
           
