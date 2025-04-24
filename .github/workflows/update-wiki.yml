@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+permissions: # needed to write to wiki repository with just the workflow's access token rather than PAT
+  contents: write
+  pages: write
+
+
 jobs:
   test:
     strategy:
