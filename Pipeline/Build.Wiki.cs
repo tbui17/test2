@@ -15,6 +15,7 @@ using FileSystem;
 using Wiki;
 using Serilog;
 
+
 public partial class Build
 {
 
@@ -79,7 +80,7 @@ public partial class Build
     GitContext WikiGitContext { get; set; }
     Target InitializeWikiGitContext => _ => _
         .DependsOn(ProvideGitContextFactory,CloneWikiRepository)
-        .Requires(() => GitHubActions.Token, () => GitUsername, () => GitEmail)
+        .Requires(() => GitUsername, () => GitEmail)
         .Unlisted()
         .Executes(() =>
         {
