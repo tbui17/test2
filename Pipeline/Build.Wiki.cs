@@ -1,4 +1,6 @@
-﻿namespace Pipeline;
+﻿using Nuke.Common.CI.GitHubActions;
+
+namespace Pipeline;
 using System.IO;
 using System.Linq;
 using Lokql.Engine.Commands;
@@ -38,6 +40,23 @@ public partial class Build
 
     GitRepository WikiRepository { get; set; }
 
+    private object GetDetails(GitRepository r)
+    {
+        var info = new
+        {
+            r.Branch,
+            r.Commit,
+            r.Endpoint,
+            r.Head,
+            r.Identifier,
+            r.RemoteBranch,
+            r.RemoteName,
+            r.Tags,
+            r.LocalDirectory,
+            r.Protocol,
+        };
+        return info;
+    }
 
     Target ProvideMainRepository => _ => _
         .Unlisted()
@@ -48,7 +67,7 @@ public partial class Build
                     ? GitRepository
                     : GitRepository.FromUrl(MainRepositoryUrl);
 
-                Log.Information("Initialized main repository object. {IsFromParameter} {RepositoryUrl}",isEmpty,MainRepository.HttpsUrl);
+                Log.Information("Initialized main repository object. {IsFromParameter} {@RepositoryDetails}",isEmpty,GetDetails(MainRepository));
             }
         );
 
@@ -62,7 +81,7 @@ public partial class Build
                     ? MainRepository.GetWikiRepository()
                     : GitRepository.FromUrl(WikiRepositoryUrl);
 
-                Log.Information("Initialized wiki repository object. {IsFromParameter} {RepositoryUrl}",isEmpty,WikiRepository.HttpsUrl);
+                Log.Information("Initialized wiki repository object. {IsFromParameter} {@RepositoryDetails}",isEmpty,GetDetails(WikiRepository));
             }
         );
 
@@ -75,6 +94,7 @@ public partial class Build
     GitContext WikiGitContext { get; set; }
     Target InitializeWikiGitContext => _ => _
         .DependsOn(ProvideGitContextFactory,CloneWikiRepository)
+        .Requires(() => GitHubActions.Instance.Token, () => GitUsername, () => GitEmail)
         .Unlisted()
         .Executes(() =>
         {
