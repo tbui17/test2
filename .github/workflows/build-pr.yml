@@ -14,8 +14,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: '${{ github.token }}'
       - name: 'Cache: .nuke/temp, ~/.nuget/packages'
         uses: actions/cache@v4
         with:
@@ -34,3 +32,4 @@ jobs:
           NUKE_WIKI_REPOSITORY_URL: https://github.com/tbui17/test1.wiki.git
           NUKE_GIT_USERNAME: github-actions[bot]
           NUKE_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
