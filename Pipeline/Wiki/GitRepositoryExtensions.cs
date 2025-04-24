@@ -15,4 +15,22 @@ public static class GitRepositoryExtensions
     {
         return GitRepository.FromUrl(repository.GetWikiUrl());
     }
+
+    public static object GetDetails(this GitRepository repository)
+    {
+        var info = new
+        {
+            repository.Branch,
+            repository.Commit,
+            repository.Endpoint,
+            repository.Head,
+            repository.Identifier,
+            repository.RemoteBranch,
+            repository.RemoteName,
+            repository.Tags,
+            repository.LocalDirectory,
+            repository.Protocol,
+        };
+        return info;
+    }
 }

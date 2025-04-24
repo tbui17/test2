@@ -1,4 +1,5 @@
 ﻿using Nuke.Common.CI.GitHubActions;
+using Nuke.Common.Tools.GitHub;
 
 namespace Pipeline;
 using System.IO;
@@ -32,6 +33,8 @@ public partial class Build
     [Parameter] string GitUsername;
     [Parameter] string GitEmail;
 
+    GitHubActions GitHubActions => GitHubActions.Instance;
+
 
 
     [GitRepository] GitRepository GitRepository;
@@ -39,24 +42,6 @@ public partial class Build
     GitRepository MainRepository { get; set; }
 
     GitRepository WikiRepository { get; set; }
-
-    private object GetDetails(GitRepository r)
-    {
-        var info = new
-        {
-            r.Branch,
-            r.Commit,
-            r.Endpoint,
-            r.Head,
-            r.Identifier,
-            r.RemoteBranch,
-            r.RemoteName,
-            r.Tags,
-            r.LocalDirectory,
-            r.Protocol,
-        };
-        return info;
-    }
 
     Target ProvideMainRepository => _ => _
         .Unlisted()
@@ -67,7 +52,7 @@ public partial class Build
                     ? GitRepository
                     : GitRepository.FromUrl(MainRepositoryUrl);
 
-                Log.Information("Initialized main repository object. {IsFromParameter} {@RepositoryDetails}",isEmpty,GetDetails(MainRepository));
+                Log.Information("Initialized main repository object. {IsFromParameter} {@RepositoryDetails}",!isEmpty,MainRepository.GetDetails());
             }
         );
 
@@ -81,7 +66,7 @@ public partial class Build
                     ? MainRepository.GetWikiRepository()
                     : GitRepository.FromUrl(WikiRepositoryUrl);
 
-                Log.Information("Initialized wiki repository object. {IsFromParameter} {@RepositoryDetails}",isEmpty,GetDetails(WikiRepository));
+                Log.Information("Initialized wiki repository object. {IsFromParameter} {@RepositoryDetails}",!isEmpty,MainRepository.GetDetails());
             }
         );
 
@@ -94,16 +79,17 @@ public partial class Build
     GitContext WikiGitContext { get; set; }
     Target InitializeWikiGitContext => _ => _
         .DependsOn(ProvideGitContextFactory,CloneWikiRepository)
-        .Requires(() => GitUsername, () => GitEmail)
+        .Requires(() => GitHubActions.Token, () => GitUsername, () => GitEmail)
         .Unlisted()
         .Executes(() =>
         {
-            WikiGitContext = GitContextFactory.Create(WikiRepositoryFolder);
-            var ctx = WikiGitContext;
+            var ctx = GitContextFactory.Create(WikiRepositoryFolder);
             ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
             ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
             ctx.Git("config --local core.autocrlf false");
-
+            var url = $"https://{GitUsername}:{GitHubActions.Token}@{WikiRepository.GetGitHubOwner()}/{ WikiRepository.GetGitHubName()}.wiki.git";
+            ctx.Git($"remote add {WikiRepositoryFolder.Name} {url}");
+            WikiGitContext = ctx;
         });
 
 
@@ -189,7 +175,7 @@ public partial class Build
         .Executes(() =>
             {
                 var ctx = WikiGitContext;
-                ctx.Git($"push origin HEAD:master");
+                ctx.Git($"push ${WikiRepositoryFolder.Name} HEAD:master");
                 Log.Information("Successfully pushed wiki changes.");
             }
         );
