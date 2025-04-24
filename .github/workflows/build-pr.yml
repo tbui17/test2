@@ -13,14 +13,19 @@ jobs:
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.GH_PAT }}'
+          path: repo
       - name: Checkout Wiki
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}.wiki
-          token: '${{ github.token }}'
+          token: '${{ secrets.GH_PAT }}'
+          path: wiki
       - name: Modify Wiki Content
         run: |
-          
+          cd wiki
           echo "### New Content" >> Home.md
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
