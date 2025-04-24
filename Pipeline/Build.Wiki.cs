@@ -94,7 +94,7 @@ public partial class Build
     GitContext WikiGitContext { get; set; }
     Target InitializeWikiGitContext => _ => _
         .DependsOn(ProvideGitContextFactory,CloneWikiRepository)
-        .Requires(() => GitHubActions.Instance.Token, () => GitUsername, () => GitEmail)
+        .Requires(() => GitUsername, () => GitEmail)
         .Unlisted()
         .Executes(() =>
         {
