@@ -29,6 +29,7 @@ jobs:
       - name: Update Wiki
         shell: pwsh
         run: |
+          pushd repo
           Write-Information "Generated cmd.txt"
           ".help" > cmd.txt
           $fileName = "LokqlDx-‐-commands.md"
@@ -37,6 +38,7 @@ jobs:
           Write-Information "Running app"
           dotnet run --project ./applications/lokql -- run --run "cmd.txt" | select -skip 3 | set-content $location
           
+          popd
           cd wiki
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
