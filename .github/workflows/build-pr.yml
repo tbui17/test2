@@ -46,28 +46,22 @@ jobs:
           git add --all
           $hasChanges = (git diff --staged --shortstat | measure-object).Count -gt 0
           if (!$hasChanges){
-            Write-Host "No changes detected."
+            Write-Host "No changes detected. No changes made to wiki."
             return;
           }
           Write-Host "Committing changes"
           git commit -m "chore: auto update command help ${{ github.run_id }}"
           Write-Host "Pushing changes"
           git push
-#      - name: 'Cache: .nuke/temp, ~/.nuget/packages'
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            .nuke/temp
-#            ~/.nuget/packages
-#          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
-#      - name: Setup .NET SDK
-#        uses: actions/setup-dotnet@v4
-#        with:
-#          dotnet-version: 9.0.x
-#      - name: Nuke CI
-#        shell: pwsh
-#        run: ./build_nuke.ps1
-#        env:
-#          NUKE_GIT_USERNAME: github-actions[bot]
-#          NUKE_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
-#          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          Write-Host "Successfully updated wiki with changes."
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Nuke CI
+        shell: pwsh
+        run: ./build_nuke.ps1
+        env:
+          NUKE_GIT_USERNAME: github-actions[bot]
+          NUKE_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
