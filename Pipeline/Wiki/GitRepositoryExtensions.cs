@@ -40,8 +40,6 @@ public static class GitRepositoryExtensions
 
             GitHubName = repository.GetGitHubName(),
             GitHubOwner = repository.GetGitHubOwner(),
-            DefaultBranch = repository.GetDefaultBranch().Result,
-
 
             IsOnDevelopBranch = repository.IsOnDevelopBranch(),
             IsOnFeatureBranch = repository.IsOnFeatureBranch(),

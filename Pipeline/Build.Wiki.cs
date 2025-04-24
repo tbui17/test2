@@ -85,9 +85,9 @@ public partial class Build
         .Executes(() =>
         {
             var ctx = GitContextFactory.Create(WikiRepositoryFolder);
-            // ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
-            // ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
-            // ctx.Git("config --local core.autocrlf false");
+            ctx.Git($"config --local user.name \"{GitUsername:nq}\"");
+            ctx.Git($"config --local user.email \"{GitEmail:nq}\"");
+            ctx.Git("config --local core.autocrlf false");
             WikiGitContext = ctx;
         });
 
@@ -131,6 +131,8 @@ public partial class Build
                 Log.Debug("Created clean folder at {Folder}", WikiRepositoryFolder);
                 var ctx = GitContextFactory.Create(WikiRepositoryFolder.Parent.NotNull());
                 ctx.Git($"clone {WikiRepository.HttpsUrl} {WikiRepositoryFolder.Name}");
+                WikiRepository = GitRepository.FromLocalDirectory(WikiRepositoryFolder);
+                Log.Information("{@Details}", WikiRepository.GetDetails());
             }
         );
 
