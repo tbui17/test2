@@ -33,3 +33,7 @@ jobs:
       - name: Nuke CI
         shell: pwsh
         run: ./build_nuke.ps1
+      - name: debug
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
