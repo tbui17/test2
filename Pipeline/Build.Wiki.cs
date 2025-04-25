@@ -1,7 +1,5 @@
 ﻿using Nuke.Common.CI.GitHubActions;
-
 namespace Pipeline;
-using System.IO;
 using System.Linq;
 using Lokql.Engine.Commands;
 using NotNullStrings;
@@ -18,15 +16,18 @@ using Serilog;
 public partial class Build
 {
 
-    AbsolutePath WikiFolder => TemporaryDirectory / "WikiBin";
-    AbsolutePath CommandHelpFile => WikiFolder / "LokqlDx-‐-commands.md";
-    AbsolutePath WikiRepositoryFolder => AbsolutePath.Create(Path.GetTempPath()) / "WikiRepo"; // we need to use the system temp path because TemporaryDirectory (.nuke/temp) is inside a repository
+    AbsolutePath WikiDirectory => TemporaryDirectory / "WikiBin";
+    AbsolutePath CommandHelpFile => WikiDirectory / "LokqlDx-‐-commands.md";
+    AbsolutePath WikiRepositoryDirectory => TemporaryDirectory / "WikiRepo";
     const string BotName = "github-actions[bot]";
     const string BotEmail = "41898282+github-actions[bot]@users.noreply.github.com";
 
 
-    [Parameter] string WikiRepositoryUrl;
-    [Parameter] string MainRepositoryUrl;
+
+    [Parameter("You should not include credentials in the URL.")]
+    string WikiRepositoryUrl;
+    [Parameter("You should not include credentials in the URL.")]
+    string MainRepositoryUrl;
 
     [Parameter] public bool DryRun;
 
@@ -51,7 +52,7 @@ public partial class Build
                     ? GitRepository
                     : GitRepository.FromUrl(MainRepositoryUrl);
 
-                Log.Information("Initialized main repository object. {IsFromParameter} {@RepositoryDetails}",!isEmpty,MainRepository.GetDetails());
+                Log.Information("Initialized main repository object. {IsFromParameter} {@Repository}",!isEmpty,MainRepository);
             }
         );
 
@@ -65,7 +66,7 @@ public partial class Build
                     ? MainRepository.GetWikiRepository()
                     : GitRepository.FromUrl(WikiRepositoryUrl);
 
-                Log.Information("Initialized wiki repository object. {IsFromParameter} {@RepositoryDetails}",!isEmpty,WikiRepository.GetDetails());
+                Log.Information("Initialized wiki repository object. {IsFromParameter} {@Repository}",!isEmpty,WikiRepository);
             }
         );
 
@@ -81,11 +82,13 @@ public partial class Build
         .Unlisted()
         .Executes(() =>
         {
-            var ctx = GitContextFactory.Create(WikiRepositoryFolder);
+            var ctx = GitContextFactory.Create(WikiRepositoryDirectory);
             ctx.Git($"config --local user.name \"{BotName:nq}\"");
             ctx.Git($"config --local user.email \"{BotEmail:nq}\"");
-            ctx.Git("config --local core.autocrlf false");
+            var url = WikiRepository.GetAuthenticatedHttpsUrl(new AuthenticationDetails(BotName,GitHubActions.NotNull().Token.NotNullOrWhiteSpace()));
+            ctx.Git($"git remote set-url origin {url}");
             WikiGitContext = ctx;
+            Log.Information("Initialized git repository configuration for {@Repository}",WikiRepository);
         });
 
 
@@ -93,8 +96,8 @@ public partial class Build
         .Unlisted()
         .Executes(() =>
             {
-                Log.Debug("Clearing {Folder}", WikiFolder);
-                WikiFolder.CreateOrCleanDirectory();
+                Log.Debug("Clearing {Folder}", WikiDirectory);
+                WikiDirectory.CreateOrCleanDirectory();
             }
         );
 
@@ -102,8 +105,8 @@ public partial class Build
         .Unlisted()
         .Executes(() =>
             {
-                Log.Debug("Clearing {Folder}", WikiRepositoryFolder);
-                WikiRepositoryFolder.CreateOrCleanDirectory();
+                Log.Debug("Clearing {Folder}", WikiRepositoryDirectory);
+                WikiRepositoryDirectory.CreateOrCleanDirectory();
             }
         );
 
@@ -125,11 +128,9 @@ public partial class Build
         .Unlisted()
         .Executes(() =>
             {
-                Log.Debug("Created clean folder at {Folder}", WikiRepositoryFolder);
-                var ctx = GitContextFactory.Create(WikiRepositoryFolder.Parent.NotNull());
-                ctx.Git($"clone {WikiRepository.HttpsUrl} {WikiRepositoryFolder.Name}");
-                WikiRepository = GitRepository.FromLocalDirectory(WikiRepositoryFolder);
-                Log.Information("{@Details}", WikiRepository.GetDetails());
+                Log.Debug("Created clean folder at {Folder}", WikiRepositoryDirectory);
+                var ctx = GitContextFactory.Create(WikiRepositoryDirectory.Parent.NotNull());
+                ctx.Git($"clone {WikiRepository.HttpsUrl} {WikiRepositoryDirectory.Name}");
             }
         );
 
@@ -147,8 +148,8 @@ public partial class Build
         .Unlisted()
         .Executes(() =>
             {
-                WikiFolder.CopyContents(WikiRepositoryFolder);
-                Log.Debug("Copied contents of {SourceFolder} to {TargetFolder}", WikiFolder, WikiRepositoryFolder);
+                WikiDirectory.CopyContents(WikiRepositoryDirectory);
+                Log.Debug("Copied contents of {SourceFolder} to {TargetFolder}", WikiDirectory, WikiRepositoryDirectory);
             }
         );
 
@@ -160,8 +161,8 @@ public partial class Build
                 var ctx = WikiGitContext;
                 ctx.Git("add --all");
                 var message = ctx.Git("diff --staged --shortstat").Select(x => x.Text).JoinAsLines();
-                ctx.Commit(message);
-                Log.Information("Successfully committed wiki changes in repository at {Folder}.",WikiRepositoryFolder);
+                ctx.Git($"commit -m \"{message:nq}\"");
+                Log.Information("Successfully committed wiki changes in repository at {Folder}.",WikiRepositoryDirectory);
             }
         );
 

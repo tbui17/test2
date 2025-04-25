@@ -6,49 +6,21 @@ namespace Pipeline.Wiki;
 public static class GitRepositoryExtensions
 {
 
-    public static string GetWikiUrl(this GitRepository repository)
+    public static string GetWikiHttpsUrl(this GitRepository repository)
     {
         return $"https://github.com/{repository.GetGitHubOwner()}/{repository.GetGitHubName()}.wiki.git";
     }
 
     public static GitRepository GetWikiRepository(this GitRepository repository)
     {
-        return GitRepository.FromUrl(repository.GetWikiUrl());
+        return GitRepository.FromUrl(repository.GetWikiHttpsUrl());
     }
 
-    public static string GetAuthenticatedUrl(this GitRepository repository, string username, string token)
+    public static string GetAuthenticatedHttpsUrl(this GitRepository repository, AuthenticationDetails authenticationDetails)
     {
-        return $"https://{username}:{token}@github.com/{repository.GetGitHubOwner()}/{repository.GetGitHubName()}.git";
-    }
-
-    public static object GetDetails(this GitRepository repository)
-    {
-        var info = new
-        {
-
-            repository.Branch,
-            repository.Commit,
-            repository.Endpoint,
-            repository.Head,
-            repository.Identifier,
-            repository.RemoteBranch,
-            repository.RemoteName,
-            repository.Tags,
-            repository.LocalDirectory,
-            repository.Protocol,
-
-
-            GitHubName = repository.GetGitHubName(),
-            GitHubOwner = repository.GetGitHubOwner(),
-
-            IsOnDevelopBranch = repository.IsOnDevelopBranch(),
-            IsOnFeatureBranch = repository.IsOnFeatureBranch(),
-            IsOnHotfixBranch = repository.IsOnHotfixBranch(),
-            IsOnMainBranch = repository.IsOnMainBranch(),
-            IsOnMainOrMasterBranch = repository.IsOnMainOrMasterBranch(),
-            IsOnMasterBranch = repository.IsOnMasterBranch(),
-            IsOnReleaseBranch = repository.IsOnReleaseBranch()
-        };
-        return info;
+        return
+            $"https://{authenticationDetails.Username}:{authenticationDetails.Token}@github.com/{repository.GetGitHubOwner()}/{repository.GetGitHubName()}.git";
     }
 }
+
+public readonly record struct AuthenticationDetails(string Username, string Token);
