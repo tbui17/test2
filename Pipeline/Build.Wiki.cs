@@ -86,7 +86,7 @@ public partial class Build
             ctx.Git($"config --local user.name \"{BotName:nq}\"");
             ctx.Git($"config --local user.email \"{BotEmail:nq}\"");
             var url = WikiRepository.GetAuthenticatedHttpsUrl(new AuthenticationDetails(BotName,GitHubActions.NotNull().Token.NotNullOrWhiteSpace()));
-            ctx.Git($"git remote set-url origin {url}");
+            ctx.Git($"remote set-url origin {url}");
             WikiGitContext = ctx;
             Log.Information("Initialized git repository configuration for {@Repository}",WikiRepository);
         });
