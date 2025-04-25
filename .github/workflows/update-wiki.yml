@@ -10,7 +10,7 @@ permissions: # needed to write to wiki repository with just the workflow's acces
   pages: write
 
 env:
-  GH_TOKEN: ${{ github.token }}
+  GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
   test:
@@ -35,8 +35,8 @@ jobs:
       - name: Nuke CI
         shell: pwsh
         run: ./build_nuke.ps1
-      - name: debug
-        if: always()
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
+#      - name: debug
+#        if: always()
+#        uses: mxschmitt/action-tmate@v3
+#        with:
+#          limit-access-to-actor: true
