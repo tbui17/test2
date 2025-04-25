@@ -10,7 +10,7 @@ permissions: # needed to write to wiki repository with just the workflow's acces
   pages: write
 
 env:
-  GH_TOKEN=${{ github.token }}
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   test:
