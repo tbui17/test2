@@ -127,7 +127,8 @@ public partial class Build
             {
                 Log.Debug("Created clean folder at {Folder}", WikiRepositoryFolder);
                 var ctx = GitContextFactory.Create(WikiRepositoryFolder.Parent.NotNull());
-                ctx.Git($"clone {WikiRepository.HttpsUrl} {WikiRepositoryFolder.Name}");
+                
+                ctx.Git($"clone {WikiRepository.SshUrl} {WikiRepositoryFolder.Name}");
                 WikiRepository = GitRepository.FromLocalDirectory(WikiRepositoryFolder);
                 Log.Information("{@Details}", WikiRepository.GetDetails());
             }

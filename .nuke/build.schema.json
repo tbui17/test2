@@ -124,12 +124,6 @@
         "DryRun": {
           "type": "boolean"
         },
-        "GitEmail": {
-          "type": "string"
-        },
-        "GitUsername": {
-          "type": "string"
-        },
         "MainRepositoryUrl": {
           "type": "string"
         },
